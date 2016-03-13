@@ -1,6 +1,8 @@
 'use strict';
 
 var React = require('react-native');
+var SearchResults = require('./SearchResults');
+
 var {
   StyleSheet,
   Text,
@@ -107,7 +109,32 @@ class SearchPage extends Component {
 
   _executeQuery(query) {
     console.log(query);
-    this.setState({isLoading: true});
+    this.setState({isLoading: true, message: ''});
+    fetch(query)
+      .then(response => response.json())
+      .then(json => this._handleResponse(json.response))
+      .catch(error => {
+        this.setState({
+          isLoading: false,
+          message: 'Something bad happened ' + error
+        })
+      });
+  }
+
+  _handleResponse(response) {
+    this.setState({isLoading: false, message: ''});
+    // console.log(response.listings);
+    if (response.application_response_code.substr(0, 1) === '1') {
+      console.log('Properties found: ' + response.listings.length);
+      this.props.navigator.push({
+        title: 'Results',
+        component: SearchResults,
+        passProps: {listings: response.listings}
+      });
+    }
+    else{
+      this.setState({message: 'Location not recognizedl; please try again.'});
+    }
   }
 
   onSearchPressed() {
@@ -158,6 +185,9 @@ class SearchPage extends Component {
 
         <Image source={require('image!housess')} style={styles.image}/>
         {spinner}
+        <Text style={styles.description}>
+          {this.state.message}
+        </Text>
 
       </View>
     );
