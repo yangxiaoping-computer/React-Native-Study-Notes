@@ -142,6 +142,25 @@ class SearchPage extends Component {
     this._executeQuery(query);
   }
 
+  onLocationPressed() {
+
+    console.log('I am onLocationPressed!');
+
+    navigator.geolocation.getCurrentPosition(
+      location => {
+        var search = location.coords.latitude + ',' + location.coords.longitude;
+        this.setState({searchString: search});
+        var query = urlForQueryAndPage('centre_point', search, 1);
+        this._executeQuery(query);
+      },
+      error => {
+        this.setState({
+          message: 'There was a problem with obtaining your location: ' + error
+        });
+      }
+      );
+  }
+
   render() {
 
     // console.log('I am rendering!');
@@ -179,7 +198,8 @@ class SearchPage extends Component {
         </View>
 
         <TouchableHighlight style={styles.button}
-            underlayColor='#99d9f4'>
+            underlayColor='#99d9f4'
+            onPress={this.onLocationPressed.bind(this)}>
           <Text style={styles.buttonText}>Location</Text>
         </TouchableHighlight>
 
